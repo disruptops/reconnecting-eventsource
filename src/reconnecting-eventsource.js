@@ -58,13 +58,12 @@ export default class ReconnectingEventSource {
       url += "lastEventId=" + encodeURIComponent(this._lastEventId);
     }
 
-    const configuration = {
-      ...this._configuration,
+    const configuration = Object.assign({}, this._configuration, {
       headers:
         typeof this._configuration.headers === "function"
           ? this._configuration.headers()
           : this._configuration.headers || {}
-    };
+    });
 
     this._eventSource = new EventSource(url, configuration);
 
