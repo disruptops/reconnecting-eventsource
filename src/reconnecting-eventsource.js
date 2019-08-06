@@ -46,7 +46,7 @@ export default class ReconnectingEventSource {
     this._start();
   }
 
-  _start() {
+  async _start() {
     let url = this.url;
 
     if (this._lastEventId) {
@@ -61,7 +61,7 @@ export default class ReconnectingEventSource {
     const configuration = Object.assign({}, this._configuration, {
       headers:
         typeof this._configuration.headers === "function"
-          ? this._configuration.headers()
+          ? await this._configuration.headers()
           : this._configuration.headers || {}
     });
 
