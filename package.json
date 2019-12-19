@@ -1,5 +1,5 @@
 {
-  "name": "reconnecting-eventsource",
+  "name": "@disruptops/reconnecting-eventsource",
   "version": "1.0.2",
   "description": "wrapper library around the JavaScript EventSource API to ensure it maintains a connection to the server.",
   "main": "lib/index.js",
@@ -16,7 +16,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fanout/reconnecting-eventsource.git"
+    "url": "git+https://github.com/disruptops/reconnecting-eventsource.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
   },
   "author": "Fanout, Inc. <info@fanout.io>",
   "license": "MIT",
