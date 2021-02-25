@@ -1,6 +1,6 @@
 {
   "name": "@disruptops/reconnecting-eventsource",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "wrapper library around the JavaScript EventSource API to ensure it maintains a connection to the server.",
   "main": "lib/index.js",
   "scripts": {
@@ -12,7 +12,7 @@
     "check:src": "npm run lint",
     "lint": "eslint src",
     "prepublishOnly": "npm run clean && npm run check:src && npm run build",
-    "test": "node test"
+    "test": "npm run build && node test"
   },
   "repository": {
     "type": "git",
@@ -48,11 +48,13 @@
     "babel-plugin-transform-es2015-modules-umd": "^6.24.1",
     "babel-preset-env": "^1.7.0",
     "cross-env": "^5.0.1",
-    "eslint": "^4.2.0",
+    "eslint": "^6.6.0",
     "eventsource": "^1.0.7",
     "rimraf": "^2.6.1",
     "sse": "0.0.8",
     "stoppable": "^1.1.0",
-    "webpack": "^3.12.0"
+    "uglifyjs-webpack-plugin": "^2.2.0",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10"
   }
 }

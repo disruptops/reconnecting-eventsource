@@ -22,6 +22,8 @@
 
 export default class ReconnectingEventSource {
   constructor(url, configuration) {
+    this._configuration = configuration != null ? Object.assign({}, configuration) : null;
+
     this._eventSource = null;
     this._lastEventId = null;
     this._timer = null;
@@ -29,7 +31,7 @@ export default class ReconnectingEventSource {
 
     this.url = url;
     this.readyState = 0;
-    this.max_retry_time = configuration.max_retry_time || 3000;
+    this.max_retry_time = 3000;
 
     this._configuration =
       configuration != null ? Object.assign({}, configuration) : null;
@@ -37,6 +39,22 @@ export default class ReconnectingEventSource {
     if (this._configuration != null && this._configuration.lastEventId) {
       this._lastEventId = this._configuration.lastEventId;
       delete this._configuration["lastEventId"];
+
+        if (this._configuration != null) {
+            if (this._configuration.lastEventId) {
+                this._lastEventId = this._configuration.lastEventId;
+                delete this._configuration['lastEventId'];
+            }
+
+            if (this._configuration.max_retry_time) {
+                this.max_retry_time = this._configuration.max_retry_time;
+                delete this._configuration['max_retry_time'];
+            }
+        }
+
+        this._onevent_wrapped = event => { this._onevent(event); };
+
+        this._start();
     }
 
     this._onevent_wrapped = event => {
@@ -46,7 +64,7 @@ export default class ReconnectingEventSource {
     this._start();
   }
 
-  async _start() {
+  _start() {
     let url = this.url;
 
     if (this._lastEventId) {
@@ -67,12 +85,9 @@ export default class ReconnectingEventSource {
 
     this._eventSource = new EventSource(url, configuration);
 
-    this._eventSource.onopen = event => {
-      this._onopen(event);
-    };
-    this._eventSource.onerror = event => {
-      this._onerror(event);
-    };
+    this._eventSource.onopen = event => { this._onopen(event); };
+    this._eventSource.onerror = event => { this._onerror(event); };
+    this._eventSource.onmessage = event => { this.onmessage(event); };
 
     // apply listen types
     for (const type of Object.keys(this._listeners)) {
