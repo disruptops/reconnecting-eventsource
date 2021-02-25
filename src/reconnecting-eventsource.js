@@ -173,6 +173,7 @@ export default class ReconnectingEventSource {
     const type = inType.toString();
 
     if (type in this._listeners) {
+      
       const listenersForType = this._listeners[type];
 
       const updatedListenersForType = listenersForType.filter(l => l !== callback);
