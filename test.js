@@ -1,3 +1,4 @@
+require("regenerator-runtime/runtime");
 EventSource = require('eventsource');
 const ReconnectingEventSource = require('.').default;
 const http = require('http');

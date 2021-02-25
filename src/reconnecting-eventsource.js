@@ -36,35 +36,24 @@ export default class ReconnectingEventSource {
     this._configuration =
       configuration != null ? Object.assign({}, configuration) : null;
 
-    if (this._configuration != null && this._configuration.lastEventId) {
-      this._lastEventId = this._configuration.lastEventId;
-      delete this._configuration["lastEventId"];
+    if (this._configuration != null) {
+      if (this._configuration.lastEventId) {
+        this._lastEventId = this._configuration.lastEventId;
+        delete this._configuration['lastEventId'];
+      }
 
-        if (this._configuration != null) {
-            if (this._configuration.lastEventId) {
-                this._lastEventId = this._configuration.lastEventId;
-                delete this._configuration['lastEventId'];
-            }
-
-            if (this._configuration.max_retry_time) {
-                this.max_retry_time = this._configuration.max_retry_time;
-                delete this._configuration['max_retry_time'];
-            }
-        }
-
-        this._onevent_wrapped = event => { this._onevent(event); };
-
-        this._start();
+      if (this._configuration.max_retry_time) {
+        this.max_retry_time = this._configuration.max_retry_time;
+        delete this._configuration['max_retry_time'];
+      }
     }
 
-    this._onevent_wrapped = event => {
-      this._onevent(event);
-    };
+    this._onevent_wrapped = event => { this._onevent(event); };
 
     this._start();
   }
 
-  _start() {
+  async _start() {
     let url = this.url;
 
     if (this._lastEventId) {
@@ -77,10 +66,11 @@ export default class ReconnectingEventSource {
     }
 
     const configuration = Object.assign({}, this._configuration, {
-      headers:
-        typeof this._configuration.headers === "function"
+      headers: this._configuration
+        ? typeof this._configuration.headers === "function"
           ? await this._configuration.headers()
           : this._configuration.headers || {}
+        : {},
     });
 
     this._eventSource = new EventSource(url, configuration);
