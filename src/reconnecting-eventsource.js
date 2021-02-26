@@ -21,7 +21,10 @@
 // IN THE SOFTWARE.
 
 export default class ReconnectingEventSource {
+
   constructor(url, configuration) {
+    this._configuration = configuration != null ? Object.assign({}, configuration) : null;
+
     this._eventSource = null;
     this._lastEventId = null;
     this._timer = null;
@@ -29,19 +32,21 @@ export default class ReconnectingEventSource {
 
     this.url = url;
     this.readyState = 0;
-    this.max_retry_time = configuration.max_retry_time || 3000;
+    this.max_retry_time = 3000;
 
-    this._configuration =
-      configuration != null ? Object.assign({}, configuration) : null;
+    if (this._configuration != null) {
+      if (this._configuration.lastEventId) {
+        this._lastEventId = this._configuration.lastEventId;
+        delete this._configuration['lastEventId'];
+      }
 
-    if (this._configuration != null && this._configuration.lastEventId) {
-      this._lastEventId = this._configuration.lastEventId;
-      delete this._configuration["lastEventId"];
+      if (this._configuration.max_retry_time) {
+        this.max_retry_time = this._configuration.max_retry_time;
+        delete this._configuration['max_retry_time'];
+      }
     }
 
-    this._onevent_wrapped = event => {
-      this._onevent(event);
-    };
+    this._onevent_wrapped = event => { this._onevent(event); };
 
     this._start();
   }
@@ -50,29 +55,27 @@ export default class ReconnectingEventSource {
     let url = this.url;
 
     if (this._lastEventId) {
-      if (url.indexOf("?") === -1) {
-        url += "?";
+      if (url.indexOf('?') === -1) {
+        url += '?';
       } else {
-        url += "&";
+        url += '&';
       }
-      url += "lastEventId=" + encodeURIComponent(this._lastEventId);
+      url += 'lastEventId=' + encodeURIComponent(this._lastEventId);
     }
 
     const configuration = Object.assign({}, this._configuration, {
-      headers:
-        typeof this._configuration.headers === "function"
+      headers: this._configuration
+        ? typeof this._configuration.headers === "function"
           ? await this._configuration.headers()
           : this._configuration.headers || {}
+        : {},
     });
 
     this._eventSource = new EventSource(url, configuration);
 
-    this._eventSource.onopen = event => {
-      this._onopen(event);
-    };
-    this._eventSource.onerror = event => {
-      this._onerror(event);
-    };
+    this._eventSource.onopen = event => { this._onopen(event); };
+    this._eventSource.onerror = event => { this._onerror(event); };
+    this._eventSource.onmessage = event => { this.onmessage(event); };
 
     // apply listen types
     for (const type of Object.keys(this._listeners)) {
@@ -119,7 +122,7 @@ export default class ReconnectingEventSource {
       }
     }
 
-    if (event.type === "message") {
+    if (event.type === 'message') {
       this.onmessage(event);
     }
   }
@@ -170,11 +173,10 @@ export default class ReconnectingEventSource {
     const type = inType.toString();
 
     if (type in this._listeners) {
+      
       const listenersForType = this._listeners[type];
 
-      const updatedListenersForType = listenersForType.filter(
-        l => l !== callback
-      );
+      const updatedListenersForType = listenersForType.filter(l => l !== callback);
 
       if (updatedListenersForType.length > 0) {
         this._listeners[type] = updatedListenersForType;

@@ -1,3 +1,4 @@
+require("regenerator-runtime/runtime");
 EventSource = require('eventsource');
 const ReconnectingEventSource = require('.').default;
 const http = require('http');
@@ -59,7 +60,7 @@ const main = async () => {
   const server1SseUrl = `http://localhost:${server1.address().port}/sse`;
 
   // Set up Eventsource
-  const eventSource = new ReconnectingEventSource(server1SseUrl, {});
+  const eventSource = new ReconnectingEventSource(server1SseUrl);
   eventSource.addEventListener('error', (error) => {
     console.error('eventSource error', error);
   });
@@ -94,6 +95,13 @@ const main = async () => {
   // clean up
   eventSource.close();
   clock.destroy();
+
+  // test construction with config
+  const eventSource2 = new ReconnectingEventSource(server1SseUrl, {
+    lastEventId: 'abc',
+    max_retry_time: 5000,
+  });
+  eventSource2.close();
 };
 
 if (require.main === module) {
